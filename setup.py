@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'turtle_control_MBP'
+package_name = 'turtle_control_mbp'
 
 setup(
     name=package_name,
@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'turtle_control = turtle_control_MBP.turtle_control:main'
+            'turtle_control = turtle_control_mbp.turtle_control:main'
         ],
     },
 )

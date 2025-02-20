@@ -42,7 +42,7 @@ class PositionMonitor(Node):
                       [turtlex0 + 0.0, turtley0 - offset],
                       [turtlex0 + offset, turtley0 - offset]]
         self.currentGoal = 0
-        self.min_distance_to_goal = 0.5
+        self.min_distance_to_goal = 0.1
         self.goalMsg = None
         
         self.publishingFrequency = 5.0 # Hz

@@ -72,15 +72,18 @@ class TurtleControl(Node):
         self.theta = 0.0
         self.theta_error = 0.0
         
-        self.x_goal = 0.0
-        self.y_goal = 0.0
+        self.x_goal = None
+        self.y_goal = None
         self.theta_goal = 0.0
         
         self.v = 0.0
         self.omega = 0.0
-        self.k_omega = 0.2
-        self.vmax = 0.2
+        
+        # Determine the maximum speed of the turtle
+        self.k_omega = 2.0  # angular velocity
+        self.vmax = 0.5     # linear velocity
 
+        # Determines the frequency of the control loop
         self.controlFrequency = 10.0 # Hz
 
 
@@ -101,6 +104,12 @@ class TurtleControl(Node):
     # Aqui você deverá computar o erro, implementar o controle e publicar a mensagem 
     # de velocidade para o turtlesim.
     def pub_callback(self):
+        
+        # Do nothing if the goal is not set
+        if self.x_goal is None or self.y_goal is None:
+            self.get_logger().error('Goal not set. Waiting for goal...')
+            return
+        
         # Computar o erro
         self.x_error = self.x_goal - self.x
         self.y_error = self.y_goal - self.y
@@ -109,11 +118,16 @@ class TurtleControl(Node):
         self.theta_error = m.atan2(self.y_error,self.x_error) - self.theta
         
         self.get_logger().error('\n\n Errors: \n\nx_error: %f, y_error: %f, theta_error: %f\n' % (self.x_error, self.y_error, self.theta_error))
-  
+
+        # Corrige o ângulo para o menor caminho
+        if self.theta_error >m.pi:
+            self.theta_error -= 2*m.pi
+        elif self.theta_error <-m.pi:
+            self.theta_error += 2*m.pi
   
         # Implementar o controle
         self.omega = self.k_omega * self.theta_error
-        self.v = self.vmax * m.tanh((self.x_error**2 + self.y_error**2)**0.5)
+        self.v = self.vmax * m.tanh(self.pos_error)
 
         # Publicar a mensagem de velocidade para o turtlesim
         msg = Twist()

@@ -3,7 +3,7 @@ import rclpy
 import rclpy.logging
 from rclpy.node import Node
 import rclpy.qos
-import tf_transformations
+import tf_transformations as tft
 
 
 from nav_msgs.msg import Odometry
@@ -30,17 +30,18 @@ class PositionMonitor(Node):
         self.RobotPositions = []
         
         # define an array of goals - [x, y]
-        turtlex0 = 5.544445
-        turtley0 = 5.544445
-        offset = 2.0
-        self.goals = [[turtlex0 + offset, turtley0 + 0.0],
-                      [turtlex0 + offset, turtley0 + offset],
-                      [turtlex0 + 0.0, turtley0 + offset],
-                      [turtlex0 - offset, turtley0 + offset],
-                      [turtlex0 - offset, turtley0 + 0.0],
-                      [turtlex0 - offset, turtley0 - offset],
-                      [turtlex0 + 0.0, turtley0 - offset],
-                      [turtlex0 + offset, turtley0 - offset]]
+        turtlex0 = 0
+        turtley0 = 0
+        offsetx = 2.0
+        offsety = 0.5
+        self.goals = [[turtlex0 + offsetx, turtley0 + 0.0],
+                      [turtlex0 + offsetx, turtley0 + offsety],
+                      [turtlex0 + 0.0, turtley0 + offsety],
+                      [turtlex0 - offsetx, turtley0 + offsety],
+                      [turtlex0 - offsetx, turtley0 + 0.0],
+                      [turtlex0 - offsetx, turtley0 - offsety],
+                      [turtlex0 + 0.0, turtley0 - offsety],
+                      [turtlex0 + offsetx, turtley0 - offsety]]
         self.currentGoal = 0
         self.min_distance_to_goal = 0.1
         self.goalMsg = None
@@ -49,30 +50,42 @@ class PositionMonitor(Node):
         
     
     def init_subscribers(self):
-        self.sub_topic_turtle_Pose2D_name = 'turtle1/pose'
-        self.sub_topic_goal_name = 'goal'
+        self.sub_topic_turtle_Pose2D_name = 'odom'
+        
   
         # self.odomSubscriber = self.create_subscription(Odometry, self.sub_topic_goal_name, self.getOdomCallback(), 10)
-        self.turtlePose_subscriber_ = self.create_subscription(TurtlePose, self.sub_topic_turtle_Pose2D_name, self.getTurtlePoseCallback, 10)
+        self.turtlePose_subscriber_ = self.create_subscription(Odometry, self.sub_topic_turtle_Pose2D_name, self.getOdomPoseCallback, 10)
         
         
     def init_publishers(self):
+        self.topic_goal_name = 'goal'
+        self.turtle_pose_name = 'turtle1/pose'
         
-        self.goal_Publisher_ = self.create_publisher(Pose, 'goal', 10)
+        self.goal_Publisher_ = self.create_publisher(Pose, self.topic_goal_name, 10)
+        self.turtle_pose_Publisher_ = self.create_publisher(TurtlePose, self.turtle_pose_name, 10)
+        
         timer_frequency = self.publishingFrequency
         timer_period = 1.0 / timer_frequency
         
         self.timer = self.create_timer(timer_period, self.publisherCallback)
     
     
-    # Get the pose from the turtlesim
-    def getTurtlePoseCallback(self, msg: TurtlePose):
-        self.get_logger().info('Getting pose from /turtle1/pose')
-        self.x = msg.x
-        self.y = msg.y
-        self.theta = msg.theta
+    # Get the pose from the Odometry and publishes as the TurtlePose
+    def getOdomPoseCallback(self, msg: Odometry):
+        self.get_logger().info('Getting pose from ' + self.sub_topic_turtle_Pose2D_name)
+        self.x = msg.pose.pose.position.x
+        self.y = msg.pose.pose.position.y
+        self.row, self.pitch, self.yaw = tft.euler_from_quaternion([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
         
+        self.theta = self.yaw
         self.get_logger().warning('\n\nPose received: x=%f, y=%f, theta=%f\n' % (self.x, self.y, self.theta))
+        
+        turtlepose = TurtlePose()
+        turtlepose.x = self.x
+        turtlepose.y = self.y
+        turtlepose.theta = self.theta
+        
+        self.turtle_pose_Publisher_.publish(turtlepose)
         
         self.checkDistanceToGoal()
         

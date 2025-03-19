@@ -54,9 +54,9 @@ class TurtleControl(Node):
 
 
     def init_publishers(self):
-        self.get_logger().info('Initializing publisher for turtle1/cmd_vel...')
+        self.get_logger().info('Initializing publisher for cmd_vel...')
         
-        self.pub_topic_name = 'turtle1/cmd_vel'
+        self.pub_topic_name = 'cmd_vel'
         self.publisher_ = self.create_publisher(Twist, self.pub_topic_name, 10)
         
         # create a timer to call the publisher callback at a fixed rate

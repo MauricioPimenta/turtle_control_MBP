@@ -34,14 +34,18 @@ class PositionMonitor(Node):
         turtley0 = 0
         offsetx = 2.0
         offsety = 0.5
-        self.goals = [[turtlex0 + offsetx, turtley0 + 0.0],
-                      [turtlex0 + offsetx, turtley0 + offsety],
-                      [turtlex0 + 0.0, turtley0 + offsety],
-                      [turtlex0 - offsetx, turtley0 + offsety],
-                      [turtlex0 - offsetx, turtley0 + 0.0],
-                      [turtlex0 - offsetx, turtley0 - offsety],
-                      [turtlex0 + 0.0, turtley0 - offsety],
-                      [turtlex0 + offsetx, turtley0 - offsety]]
+        # self.goals = [[turtlex0 + offsetx, turtley0 + 0.0],
+        #               [turtlex0 + offsetx, turtley0 + offsety],
+        #               [turtlex0 + 0.0, turtley0 + offsety],
+        #               [turtlex0 - offsetx, turtley0 + offsety],
+        #               [turtlex0 - offsetx, turtley0 + 0.0],
+        #               [turtlex0 - offsetx, turtley0 - offsety],
+        #               [turtlex0 + 0.0, turtley0 - offsety],
+        #               [turtlex0 + offsetx, turtley0 - offsety]]
+        self.goals = [[2.0 , -0.5],
+                      [2.0 , 0.5],
+                      [-2.0, 0.5],
+                      [-2.0, -0.5]]
         self.currentGoal = 0
         self.min_distance_to_goal = 0.1
         self.goalMsg = None
